@@ -1,0 +1,47 @@
+body {
+    background-color: #f8f9fa; /* Cambia el color de fondo según tus preferencias */
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.card {
+    width: 80%;
+    max-width: 700px;
+    margin: auto;
+    background-color: #fff; /* Color de fondo del card */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    font-family: 'Nunito', sans-serif;
+}
+
+
+.card-header {
+    background-color: #000875; /* Nuevo color celeste para el encabezado */
+    padding: 20px;
+    text-align: center;
+    color:#000875;  /* Color del texto en el encabezado, en este caso, blanco */
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.btn-success {
+    background-color: #1f0eb8; /* Color verde para el botón de éxito */
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #346bd1; /* Cambia el color al pasar el ratón sobre el botón */
+}
+
+a {
+    color: #007bff; /* Color del enlace */
+}
