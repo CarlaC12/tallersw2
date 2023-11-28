@@ -7,7 +7,7 @@
 @stop
 
 @section('content')
-    <form action="{{ route('salidas.store') }}" method="POST">
+    <form action="{{ route('salidas.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <label for="hora">Ingrese la hora de salida</label>
@@ -42,7 +42,7 @@
 
         <label for="file">Subir imágenes (Opcional)</label>
         <br>
-        <input type="file" class="form-control-file" name="files[]" multiple onchange="mostrarFotosSeleccionadas(event)">
+        <input type="file" class="form-control-file" name="file" multiple onchange="mostrarFotosSeleccionadas(event)">
         <div id="contenedor-fotos-preview" class="row"></div>
         @error('file')
             <small>*{{ $message }}</small>

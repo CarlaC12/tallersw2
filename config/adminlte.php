@@ -308,6 +308,11 @@ return [
             'icon' => 'fas fa-clipboard-list fa-fw',
         ],
         [
+            'text' => 'Cotizaciones',
+            'route'  => 'cotizaciones.index',
+            'icon' => 'fas fa-clipboard-list fa-fw',
+        ],
+        [
             'text' => 'Reportes',
             'icon' => 'fas fa-users fa-fw',
             'submenu' => [

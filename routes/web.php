@@ -32,11 +32,10 @@ use App\Models\User;
 
 use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\ConsultaController;
+use App\Http\Controllers\CotizacionIAController;
 use App\Http\Controllers\NegocioController;
 use App\Http\Controllers\OrdenRepuestoController;
-
-
-
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,3 +136,5 @@ Route::post('consultas', [ConsultaController::class, 'consulta_get'])->name('con
 
 Route::get('/notas', [FacturaController::class, 'index2'])->name('notas');
 Route::get('/nota/{id}', [FacturaController::class, 'show2'])->name('notaShow2');
+
+Route::resource('/cotizaciones', CotizacionIAController::class);

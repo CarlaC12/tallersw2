@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Entrada;
 use App\Models\EntradaSalida;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Database\Eloquent\Collection;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -19,8 +16,9 @@ use Illuminate\Support\Facades\Log;
 class EntradaController extends Controller
 {
     public $API_FILE;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->API_FILE = env('API_FILE', '');
     }
     /**
@@ -31,7 +29,19 @@ class EntradaController extends Controller
     public function index()
     {
         $entradas = EntradaSalida::where('tipo', 1)->get();
-        return view('entradas.index', compact('entradas'));
+        try {
+            // Aumentar el tiempo de respuesta para todas las solicitudes
+            set_time_limit(300);
+            // Cree una instancia de Guzzle
+            $client = new Client();
+            $response = $client->get(env('API_FILE') . '/list');
+            //dd(json_decode($response->getBody(), true)['data']);
+            $imagenes = json_decode($response->getBody(), true)['data'];
+            return view('entradas.index', compact('entradas', 'imagenes'));
+        } catch (\Throwable $th) {
+            $imagenes = [];
+            return view('entradas.index', compact('entradas', 'imagenes'))->with('danger', 'Error: Error del servidor de la API FILES.');
+        }
     }
 
     /**
@@ -56,7 +66,7 @@ class EntradaController extends Controller
             'fecha' => 'required',
             'hora' => 'required',
             'tipo' => 'required',
-        ]);                
+        ]);
         $entrada = new Entrada();
         $entrada->hora = $request->hora;
         $entrada->fecha = $request->fecha;
@@ -64,30 +74,45 @@ class EntradaController extends Controller
         $entrada->tipo = $request->tipo;
         $entrada->save();
         try {
-            if ($request->hasFile('files')) {
-                $files = $request->file('files');
-                $url = "{$this->API_FILE}/api/archivo";
-                foreach ($files as $file) {
-                    $response = Http::attach(
-                        'file', // Nombre del archivo en el formulario
-                        file_get_contents($file->path()),
-                        $file->getClientOriginalName()
-                    )->post($url, [
-                        'foreign_id' => $entrada->id // Agrega la otra variable al cuerpo de la solicitud
-                    ]);
-                }
-            }
+            // Aumentar el tiempo de respuesta para todas las solicitudes
+            set_time_limit(300);
+            //
+            $file = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+
+            // Mueve el archivo a la carpeta 'public/uploads'
+            $file->move(public_path('uploads'), $fileName);
+
+            // Obtiene la dirección completa del archivo
+            $filePath = public_path('uploads/' . $fileName);
+            // Cree una instancia de Guzzle
+            $client = new Client();
+
+            $response = $client->post(
+                env('API_FILE'). '/add',
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
+                    'multipart' => [
+                        [
+                            'name' => 'file',
+                            'contents' => fopen($filePath, 'r'),
+                        ],
+                        [
+                            'name' => 'id_foranea',
+                            'contents' => $entrada->id,
+                        ]
+                    ],
+                ]
+            );
+            /*$services_ia = json_decode($response->getBody(), true)['data'];
+            $url = json_decode($response->getBody(), true)['url'];*/
+            //dd($services_ia);
+            return redirect()->route('entradas.index');
         } catch (\Throwable $th) {
-            
+            return redirect()->route('entradas.index')->with('danger', 'Error: Error del servidor de la API Files.');
         }
-        /* activity()->useLog('Entrada')->log('Nuevo')->subject();
-        $lastActivity = Activity::all()->last();
-        $lastActivity->subject_id = Entrada::all()->last()->id;
-        $lastActivity->description = request()->ip();
-        $lastActivity->save(); */
-        return redirect()->route('entradas.index');
-
-
     }
 
     /**
@@ -102,12 +127,11 @@ class EntradaController extends Controller
         $url = "{$this->API_FILE}/api/archivo/get-files/{$id}";
         // $images = DB::table('imagenes')->where('entradaSalidaId', $id)->get();
         try {
-            $images = Http::get($url)->json();            
+            $images = Http::get($url)->json();
         } catch (\Throwable $th) {
             $images = [];
         }
         return view('entradas.show', compact('entrada', 'images'));
-        
     }
 
     /**
@@ -143,6 +167,31 @@ class EntradaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $entrada = EntradaSalida::FindOrFail($id);
+        $entrada->delete();
+        try {
+            // Aumentar el tiempo de respuesta para todas las solicitudes
+            set_time_limit(300);
+            // Cree una instancia de Guzzle
+            $client = new Client();
+
+            $response = $client->delete(
+                env('API_FILE'). '/delete/' . $id,
+                [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                    ],
+                    'multipart' => [
+                        [
+                            'name' => 'id_foranea',
+                            'contents' => $id,
+                        ]
+                    ],
+                ]
+            );
+            return redirect()->route('entradas.index');
+        } catch (\Throwable $th) {
+            return redirect()->route('entradas.index')->with('danger', 'Error: Error del servidor de la API Files.');
+        }
     }
 }

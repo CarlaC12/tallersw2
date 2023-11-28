@@ -42,7 +42,7 @@
 
         <label for="file">Subir imágenes (Opcional)</label>
         <br>
-        <input type="file" class="form-control-file" name="files[]" multiple  onchange="mostrarFotosSeleccionadas(event)" enctype="multipart/form-data">
+        <input type="file" class="form-control-file" name="file" multiple  onchange="mostrarFotosSeleccionadas(event)" enctype="multipart/form-data">
         <div id="contenedor-fotos-preview" class="row"></div>
         @error('file')
             <small>*{{ $message }}</small>

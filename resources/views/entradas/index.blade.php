@@ -6,6 +6,13 @@
     <h1>Lista de Registros de Entradas al taller</h1>
 @stop
 
+<!-- Mensaje de error -->
+@if (session('danger'))
+    <div class="alert alert-danger">
+        {{ session('danger') }}
+    </div>
+@endif
+
 @section('content')
 <div class="card">
     <div class="card-header">
@@ -22,6 +29,7 @@
                     <th scope="col">Id</th>
                     <th scope="col">fecha</th>
                     <th scope="col">hora</th>
+                    <th scope="col">Imagen</th>
                     <th scope="col">Accion</th>
                 </tr>
             </thead>
@@ -33,14 +41,21 @@
                         <td>{{$entrada->fecha}}</td>
                         <td>{{$entrada->hora}}</td>
                         <td>
-                            <form action="{{route('entradas.destroy', $entrada)}}" method="post">
+                        @foreach ($imagenes as $imagen)
+                            @if ($imagen['id_foranea'] == $entrada->id)
+                            <img src="{{ $imagen['image_url'] }}" alt="..." width="150">
+                            @endif
+                        @endforeach
+                        </td>
+                        <td>
+                            <form action="{{route('entradas.destroy', $entrada->id)}}" method="post">
                                 @csrf
                                 @method('delete')
-                                <a href="{{route('entradas.show', $entrada)}}" class="btn btn-info btn-sm">Ver Detalles<a>    
+                                {{--  <a href="{{route('entradas.show', $entrada)}}" class="btn btn-info btn-sm">Ver Detalles<a> --}}
                                 {{-- <a href="{{route('entradas.edit', $entrada)}}" class="btn btn-info btn-sm">Editar<a> --}}
                                 @can('editar proceso')
                                 @endcan
-                                {{-- <button class="btn btn-danger btn-sm" onclick="return confirm('¿ESTA SEGURO DE  BORRAR?')" value="Borrar">Eliminar</button>  --}}
+                                <button class="btn btn-danger btn-sm" onclick="return confirm('¿ESTA SEGURO DE  BORRAR?')" value="Borrar">Eliminar</button>
                                 @can('eliminar usuario')
                                 @endcan
                             </form>
